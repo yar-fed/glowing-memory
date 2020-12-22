@@ -3,3 +3,4 @@ Subtask: create a random number generator script.
 task02: implement random_number_gen subtask
 Subtask completed.
 Subtask: Extract Function refactoring.
+Subtask completed.
