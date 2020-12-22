@@ -5,3 +5,4 @@ Subtask completed.
 Subtask: Extract Function refactoring.
 task02: refactor generator to function
 Subtask completed.
+Subtask: Implement guessing of random number from command line argument
