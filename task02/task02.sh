@@ -16,5 +16,13 @@ function compare_numbers ()
 	fi
 }
 
+if [[ -z "$1" ]]; then
+	echo "No argument found"
+	exit 1
+elif [[ ! "$1" =~ [0-9]+ ]]; then
+	echo "'$1' is not a number"
+	exit 2
+fi
+
 compare_numbers "$1" "$(genrand)"
 
