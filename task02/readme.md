@@ -8,3 +8,4 @@ Subtask completed.
 Subtask: Implement guessing of random number from command line argument
 task02: implemet number guessing
 task02: add error messages on missing or non-digit argument
+Subtask completed.
