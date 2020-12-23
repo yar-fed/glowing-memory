@@ -17,12 +17,17 @@ function compare_numbers ()
 }
 
 if [[ -z "$1" ]]; then
-	echo "No argument found"
-	exit 1
+	read -p "Please enter a number: " NUMBER
+	if [[ ! "$NUMBER" =~ [0-9]+ ]]; then
+		echo "'$NUMBER' is not a number"
+		exit 2
+	fi
 elif [[ ! "$1" =~ [0-9]+ ]]; then
 	echo "'$1' is not a number"
 	exit 2
+else
+	NUMBER=$1
 fi
 
-compare_numbers "$1" "$(genrand)"
+compare_numbers "$NUMBER" "$(genrand)"
 
