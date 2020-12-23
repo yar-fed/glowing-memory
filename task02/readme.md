@@ -10,3 +10,4 @@ task02: implemet number guessing
 task02: add error messages on missing or non-digit argument
 Subtask completed.
 Subtask: Implement asking number if command line argument is missing
+task02: implement asking a number if argument is missing
