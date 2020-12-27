@@ -5,17 +5,6 @@ function genrand ()
 	echo $(seq 0 $1 | shuf - | head -1)
 }
 
-function compare_numbers ()
-{
-	if [[ $1 -lt $2 ]]; then
-		echo "$1 is less than $2"
-	elif [[ $1 -gt $2 ]]; then
-		echo "$1 is greater than $2"
-	else
-		echo "$1 is equal to $2"
-	fi
-}
-
 if [[ -z "$1" ]]; then
 	read -p "Please enter a number: " NUMBER
 	if [[ ! "$NUMBER" =~ [0-9]+ ]]; then
@@ -47,5 +36,37 @@ else
 	UPPER_LIMIT=$2
 fi
 
-compare_numbers "$NUMBER" "$(genrand $UPPER_LIMIT)"
+if [[ -z "$3" ]]; then
+	GUESSES_N=1
+elif [[ ! "$3" =~ [1-9][0-9]* ]]; then
+	echo "'$3' is not a valid number"
+	exit 2
+else
+	GUESSES_N=$3
+fi
+
+
+while true; do
+	RAND_NUMBER="$(genrand $UPPER_LIMIT)"
+	if [[ $NUMBER -lt $RAND_NUMBER ]]; then
+		echo "$NUMBER is less than $RAND_NUMBER"
+	elif [[ $NUMBER -gt $RAND_NUMBER ]]; then
+		echo "$NUMBER is greater than $RAND_NUMBER"
+	else
+		echo "$NUMBER is equal to $RAND_NUMBER"
+		break
+	fi
+
+	GUESSES_N=$((GUESSES_N - 1))
+	if [[ $GUESSES_N -eq 0 ]]; then
+		break
+	fi
+
+	echo "Guesses left: $GUESSES_N"
+	read -p "Try again: " NUMBER
+	while [[ ! "$NUMBER" =~ [0-9]+ ]]; do
+		echo "'$NUMBER' is not a number"
+		read -p "Try again: " NUMBER
+	done
+done
 
