@@ -14,3 +14,4 @@ task02: implement asking a number if argument is missing
 Subtask completed.
 Subtask: Implement upper limit of random number from command line argument
 task02: add upper limit from command line argument
+Subtask completed.
