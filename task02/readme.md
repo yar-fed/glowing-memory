@@ -25,3 +25,4 @@ Subtask: Implement asking number of guesses if command line argument is missing
 task02: implement asking number of guesses if argument is missing
 Subtask completed.
 Subtask: Refactor random generator, write comments in script
+Subtask completed.
