@@ -30,7 +30,13 @@ else
 fi
 
 if [[ -z "$2" ]]; then
-	UPPER_LIMIT=5
+	read -p "Please enter a number (leave blank to use default 5): " UPPER_LIMIT
+	if [[ -z "$UPPER_LIMIT" ]]; then
+		UPPER_LIMIT=5
+	elif [[ ! "$UPPER_LIMIT" =~ [0-9]+ ]]; then
+		echo "'$UPPER_LIMIT' is not a number"
+		exit 2
+	fi
 elif [[ ! "$2" =~ [0-9]+ ]]; then
 	echo "'$2' is not a number"
 	exit 2
