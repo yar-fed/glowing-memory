@@ -21,3 +21,4 @@ Subtask completed.
 Subtask: Implement number of guesses from command line argument
 task02: add multiple guesses from command line argument
 Subtask completed.
+Subtask: Implement asking number of guesses if command line argument is missing
