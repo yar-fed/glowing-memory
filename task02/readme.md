@@ -19,3 +19,4 @@ Subtask: Implement asking upper limit if command line argument is missing
 task02: implement asking upper limit if argument is missing
 Subtask completed.
 Subtask: Implement number of guesses from command line argument
+task02: add multiple guesses from command line argument
