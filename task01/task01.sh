@@ -1,14 +1,43 @@
 #!/bin/bash
 
+declare -A DMODES
+declare -A FLAGS
+for i in $@; do
+	case $i in
+		-h|--help )
+			echo -e "Usage: task01 [-h|-a|-l|--help|--all|--long] [<starting_dir>]
+
+	<starting_dir>: path to directory where program starts, if multiple dirs are given, the last one is used
+	-h|--help: print this message and exit
+	-a|--all: toggle 'all' mode (all files are listed in directory)
+	-l|--long: toggle 'long' mode (files are listed in long format)
+"
+			exit 0
+			;;
+		-a|--all )
+			DMODES[all]=all
+			FLAGS[a]="-a"
+			;;
+		-l|--long )
+			DMODES[long]=long
+			FLAGS[l]="-l"
+			;;
+		-* )
+			echo "Unknown option '${i#-}'"
+			exit 1
+			;;
+		* )
+			[[ -d $i ]] && cd $i
+			;;
+	esac
+done
+
 clear
 
-[[ -d $1 ]] && cd $1
-DM='long'
-LS="ls -a"
-PS3="$($LS)"$'\n'
+PS3="$(ls ${FLAGS[*]})"$'\n'
 OPTIONS=("Toggle" "cd" "copy" "move" "remove" "exit")
 while true; do
-	OPTIONS[0]="Toggle display mode (currently $DM)"
+	OPTIONS[0]="Toggle display mode (currently ${DMODES[*]})"
 	IFSBKP=$IFS
 	IFS=''
 	select COMMAND in "${OPTIONS[@]}"; do
@@ -16,14 +45,32 @@ while true; do
 		clear
 		case $REPLY in
 			1 )
-				if [[ $DM == "short" ]]; then
-					LS="ls -a"
-					DM='long'
-				else
-					LS="ls"
-					DM='short'
-				fi
-				
+				PS3=""
+				select MODE in "toggle all" "toggle long"; do
+					case $REPLY in
+						1 )
+							if [[ ${DMODES[all]} == "all" ]]; then
+								DMODES[all]=""
+								FLAGS[a]=""
+							else
+								DMODES[all]="all"
+								FLAGS[a]="-a"
+							fi
+							;;
+						2 )
+							if [[ ${DMODES[long]} == "long" ]]; then
+								DMODES[long]=""
+								FLAGS[l]=""
+							else
+								DMODES[long]="long"
+								FLAGS[l]="-l"
+								echo ${FLAGS[*]}
+								read a
+							fi
+							;;
+					esac
+					break
+				done
 				;;
 			2 )
 				PS3=""
@@ -126,7 +173,7 @@ while true; do
 		esac
 		break
 	done
-	PS3="$($LS)"$'\n'
+	PS3="$(ls ${FLAGS[*]})"$'\n'
 	clear
 done
 
