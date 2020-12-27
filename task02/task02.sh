@@ -1,12 +1,17 @@
 #!/bin/bash
 
+# random number generator funtion
+# takes an upper limit as first positional argument
 function genrand ()
 {
-	echo $(seq 0 $1 | shuf - | head -1)
+	lim=$1
+	echo $(( RANDOM % (lim + 1) ))
 }
 
+# parsing and validating first positional argument (user guess)
+# if no argument given ask user to enter a number instead
 if [[ -z "$1" ]]; then
-	read -p "Please enter a number: " NUMBER
+	read -p "Please enter your guess: " NUMBER
 	if [[ ! "$NUMBER" =~ [0-9]+ ]]; then
 		echo "'$NUMBER' is not a number"
 		exit 2
@@ -18,8 +23,10 @@ else
 	NUMBER=$1
 fi
 
+# parsing and validating second positional argument (upper limit)
+# if no argument given ask user to enter a number instead
 if [[ -z "$2" ]]; then
-	read -p "Please enter a number (leave blank to use default 5): " UPPER_LIMIT
+	read -p "Please enter upper limit (leave blank to use default 5): " UPPER_LIMIT
 	if [[ -z "$UPPER_LIMIT" ]]; then
 		UPPER_LIMIT=5
 	elif [[ ! "$UPPER_LIMIT" =~ [0-9]+ ]]; then
@@ -36,6 +43,8 @@ else
 	UPPER_LIMIT=$2
 fi
 
+# parsing and validating third positional argument (number of guesses)
+# if no argument given ask user to enter a number instead
 if [[ -z "$3" ]]; then
 	read -p "Please enter number of guesses (leave blank to use default 1): " GUESSES_N
 	if [[ -z "$GUESSES_N" ]]; then
@@ -51,7 +60,7 @@ else
 	GUESSES_N=$3
 fi
 
-
+# guess loop
 while true; do
 	RAND_NUMBER="$(genrand $UPPER_LIMIT)"
 	if [[ $NUMBER -lt $RAND_NUMBER ]]; then
