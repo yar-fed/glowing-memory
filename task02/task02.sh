@@ -2,7 +2,7 @@
 
 function genrand ()
 {
-	echo $(seq 0 5 | shuf - | head -1)
+	echo $(seq 0 $1 | shuf - | head -1)
 }
 
 function compare_numbers ()
@@ -29,5 +29,17 @@ else
 	NUMBER=$1
 fi
 
-compare_numbers "$NUMBER" "$(genrand)"
+if [[ -z "$2" ]]; then
+	UPPER_LIMIT=5
+elif [[ ! "$2" =~ [0-9]+ ]]; then
+	echo "'$2' is not a number"
+	exit 2
+elif [[ $2 -lt 1 || $2 -gt 100 ]]; then
+	echo "'$2' should be in range [1;100]"
+	exit 3
+else
+	UPPER_LIMIT=$2
+fi
+
+compare_numbers "$NUMBER" "$(genrand $UPPER_LIMIT)"
 
