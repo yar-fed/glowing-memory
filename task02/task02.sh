@@ -37,7 +37,13 @@ else
 fi
 
 if [[ -z "$3" ]]; then
-	GUESSES_N=1
+	read -p "Please enter number of guesses (leave blank to use default 1): " GUESSES_N
+	if [[ -z "$GUESSES_N" ]]; then
+		GUESSES_N=1
+	elif [[ ! "$GUESSES_N" =~ [1-9][0-9]* ]]; then
+		echo "'$GUESSES_N' is not a number"
+		exit 2
+	fi
 elif [[ ! "$3" =~ [1-9][0-9]* ]]; then
 	echo "'$3' is not a valid number"
 	exit 2
