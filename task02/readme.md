@@ -26,3 +26,4 @@ task02: implement asking number of guesses if argument is missing
 Subtask completed.
 Subtask: Refactor random generator, write comments in script
 task02: refactor random generator, add comments
+Subtask completed.
