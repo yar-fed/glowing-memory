@@ -30,3 +30,4 @@ Subtask completed.
 Subtask: Implement play again feature on win
 task02: add asking to play again on successful guess
 Subtask completed.
+Subtask: Add options to specify upper limit and number of guesses
