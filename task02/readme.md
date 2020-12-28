@@ -34,3 +34,4 @@ Subtask: Add options to specify upper limit and number of guesses
 task02: introduce options to replace positional arguments
 Subtask completed.
 Subtask: Implement a menu
+task02: implement menu
