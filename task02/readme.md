@@ -28,3 +28,4 @@ Subtask: Refactor random generator, write comments in script
 task02: refactor random generator, add comments
 Subtask completed.
 Subtask: Implement play again feature on win
+Subtask completed.
