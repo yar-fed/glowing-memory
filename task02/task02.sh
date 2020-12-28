@@ -61,8 +61,8 @@ while [[ "$#" -gt 0 ]]; do
 	shift
 done
 
-# if upper limit is not given ask user to enter it
-if [[ -z "$UPPER_LIMIT" ]]; then
+function enter_upper_limit ()
+{
 	read -p "Please enter upper limit (leave blank to use default 5): " UPPER_LIMIT
 	if [[ -z "$UPPER_LIMIT" ]]; then
 		UPPER_LIMIT=5
@@ -73,10 +73,10 @@ if [[ -z "$UPPER_LIMIT" ]]; then
 		echo "'$UPPER_LIMIT ' should be in range [1;100]"
 		exit 3
 	fi
-fi
+}
 
-# if number of guesses is not given ask user to enter it
-if [[ -z "$GUESSES_N" ]]; then
+function enter_guesses_n ()
+{
 	read -p "Please enter number of guesses (leave blank to use default 1): " GUESSES_N
 	if [[ -z "$GUESSES_N" ]]; then
 		GUESSES_N=1
@@ -84,37 +84,72 @@ if [[ -z "$GUESSES_N" ]]; then
 		echo "'$GUESSES_N' is not a number"
 		exit 2
 	fi
+}
+
+# if upper limit is not given ask user to enter it
+if [[ -z "$UPPER_LIMIT" ]]; then
+	enter_upper_limit
 fi
 
-GUESSES_N_BKP=$GUESSES_N
+# if number of guesses is not given ask user to enter it
+if [[ -z "$GUESSES_N" ]]; then
+	enter_guesses_n
+fi
 
-# guess loop
-while true; do
-	RAND_NUMBER="$(genrand $UPPER_LIMIT)"
-	if [[ $NUMBER -lt $RAND_NUMBER ]]; then
-		echo "$NUMBER is less than $RAND_NUMBER"
-	elif [[ $NUMBER -gt $RAND_NUMBER ]]; then
-		echo "$NUMBER is greater than $RAND_NUMBER"
-	else
-		echo "$NUMBER is equal to $RAND_NUMBER"
-		read -p "Would you like to play again? (y/n): " YN
-		if [[ ! $YN =~ [Yy] ]]; then
+function play_game ()
+{
+	GUESSES_N_BKP=$GUESSES_N
+	# guess loop
+	while true; do
+		RAND_NUMBER="$(genrand $UPPER_LIMIT)"
+		if [[ $NUMBER -lt $RAND_NUMBER ]]; then
+			echo "$NUMBER is less than $RAND_NUMBER"
+		elif [[ $NUMBER -gt $RAND_NUMBER ]]; then
+			echo "$NUMBER is greater than $RAND_NUMBER"
+		else
+			echo "$NUMBER is equal to $RAND_NUMBER"
+			read -p "Would you like to play again? (y/n): " YN
+			if [[ ! $YN =~ [Yy] ]]; then
+				break
+			fi
+			GUESSES_N=$GUESSES_N_BKP
+			continue
+		fi
+
+		GUESSES_N=$((GUESSES_N - 1))
+		if [[ $GUESSES_N -eq 0 ]]; then
 			break
 		fi
-		GUESSES_N=$GUESSES_N_BKP
-		continue
-	fi
 
-	GUESSES_N=$((GUESSES_N - 1))
-	if [[ $GUESSES_N -eq 0 ]]; then
-		break
-	fi
-
-	echo "Guesses left: $GUESSES_N"
-	read -p "Try again: " NUMBER
-	while [[ ! "$NUMBER" =~ [0-9]+ ]]; do
-		echo "'$NUMBER' is not a number"
+		echo "Guesses left: $GUESSES_N"
 		read -p "Try again: " NUMBER
+		while [[ ! "$NUMBER" =~ [0-9]+ ]]; do
+			echo "'$NUMBER' is not a number"
+			read -p "Try again: " NUMBER
+		done
+	done
+	exit 0
+}
+
+PS3="> "
+while true; do
+	select CHOICE in "Play" "Change upper limit (currently $UPPER_LIMIT)" "Change number of guesses (currently $GUESSES_N)"; do
+		clear
+		case $REPLY in
+			1 )
+				play_game
+				;;
+			2 )
+				enter_upper_limit
+				;;
+			3 )
+				enter_guesses_n
+				;;
+			* )
+				exit 0
+				;;
+		esac
+		break
 	done
 done
 
