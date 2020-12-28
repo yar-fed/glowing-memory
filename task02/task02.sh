@@ -9,7 +9,7 @@ function genrand ()
 }
 
 # parsing and validating first positional argument (user guess)
-# if no argument given ask user to enter a number instead
+# if it is not a number ask user to enter a number instead
 if [[ -z "$1" ]]; then
 	read -p "Please enter your guess: " NUMBER
 	if [[ ! "$NUMBER" =~ [0-9]+ ]]; then
@@ -22,30 +22,61 @@ elif [[ ! "$1" =~ [0-9]+ ]]; then
 else
 	NUMBER=$1
 fi
+shift
 
-# parsing and validating second positional argument (upper limit)
-# if no argument given ask user to enter a number instead
-if [[ -z "$2" ]]; then
+# parsing options
+while [[ "$#" -gt 0 ]]; do
+	case $1 in
+		-u|--upper=* )
+			if [[ "${1#=}" =~ [0-9]+ ]]; then
+				UPPER_LIMIT=${1#=}
+			elif [[ "$2" =~ [0-9]+ ]]; then
+				UPPER_LIMIT=$2
+				shift
+			else
+				echo "'$UPPER_LIMIT' is not a number"
+				exit 2
+			fi
+			if [[ ! -v UPPER_LIMIT && $UPPER_LIMIT -gt 0 && $UPPER_LIMIT -lt 101 ]]; then
+				echo "'$UPPER_LIMIT ' should be in range [1;100]"
+				exit 3
+			fi
+			;;
+		-g|--guesses=* )
+			echo $1 $2
+			if [[ "${1#=}" =~ [1-9][0-9]* ]]; then
+				GUESSES_N=${1#=}
+			elif [[ "$2" =~ [1-9][0-9]* ]]; then
+				GUESSES_N=$2
+				shift
+			else
+				echo "'$GUESSES_N' is not a valid number of guesses"
+				exit 2
+			fi
+			;;
+		-* )
+			echo "Unknown option '${1#-}'"
+			exit 4
+	esac
+	shift
+done
+
+# if upper limit is not given ask user to enter it
+if [[ -z "$UPPER_LIMIT" ]]; then
 	read -p "Please enter upper limit (leave blank to use default 5): " UPPER_LIMIT
 	if [[ -z "$UPPER_LIMIT" ]]; then
 		UPPER_LIMIT=5
 	elif [[ ! "$UPPER_LIMIT" =~ [0-9]+ ]]; then
 		echo "'$UPPER_LIMIT' is not a number"
 		exit 2
+	elif [[ $UPPER_LIMIT -lt 1 && $UPPER_LIMIT -gt 100 ]]; then
+		echo "'$UPPER_LIMIT ' should be in range [1;100]"
+		exit 3
 	fi
-elif [[ ! "$2" =~ [0-9]+ ]]; then
-	echo "'$2' is not a number"
-	exit 2
-elif [[ $2 -lt 1 || $2 -gt 100 ]]; then
-	echo "'$2' should be in range [1;100]"
-	exit 3
-else
-	UPPER_LIMIT=$2
 fi
 
-# parsing and validating third positional argument (number of guesses)
-# if no argument given ask user to enter a number instead
-if [[ -z "$3" ]]; then
+# if number of guesses is not given ask user to enter it
+if [[ -z "$GUESSES_N" ]]; then
 	read -p "Please enter number of guesses (leave blank to use default 1): " GUESSES_N
 	if [[ -z "$GUESSES_N" ]]; then
 		GUESSES_N=1
@@ -53,14 +84,10 @@ if [[ -z "$3" ]]; then
 		echo "'$GUESSES_N' is not a number"
 		exit 2
 	fi
-elif [[ ! "$3" =~ [1-9][0-9]* ]]; then
-	echo "'$3' is not a valid number"
-	exit 2
-else
-	GUESSES_N=$3
 fi
 
 GUESSES_N_BKP=$GUESSES_N
+
 # guess loop
 while true; do
 	RAND_NUMBER="$(genrand $UPPER_LIMIT)"
