@@ -60,6 +60,7 @@ else
 	GUESSES_N=$3
 fi
 
+GUESSES_N_BKP=$GUESSES_N
 # guess loop
 while true; do
 	RAND_NUMBER="$(genrand $UPPER_LIMIT)"
@@ -69,7 +70,12 @@ while true; do
 		echo "$NUMBER is greater than $RAND_NUMBER"
 	else
 		echo "$NUMBER is equal to $RAND_NUMBER"
-		break
+		read -p "Would you like to play again? (y/n): " YN
+		if [[ ! $YN =~ [Yy] ]]; then
+			break
+		fi
+		GUESSES_N=$GUESSES_N_BKP
+		continue
 	fi
 
 	GUESSES_N=$((GUESSES_N - 1))
