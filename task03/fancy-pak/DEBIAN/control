@@ -1,0 +1,9 @@
+Package: fancy-pak
+Version: 1.0
+Section: custom
+Priority: optional
+Architecture: amd64
+Essential: no
+Installed-Size: 42069
+Maintainer: Fedoriachenko_Yaroslav
+Description: pak and unpak utilities to compress and decompress respectivly data from stdin and output it to stdout
