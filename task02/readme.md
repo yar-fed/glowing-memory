@@ -35,3 +35,4 @@ task02: introduce options to replace positional arguments
 Subtask completed.
 Subtask: Implement a menu
 task02: implement menu
+Subtask completed.
