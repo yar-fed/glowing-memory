@@ -1,0 +1,13 @@
+*.ko
+*.o
+*.mod
+*.cmd
+*.mod.c
+Module.symvers
+modules.order
+*.elf
+*.hex
+*.d
+*.ld
+compile_commands.json
+.cache/
