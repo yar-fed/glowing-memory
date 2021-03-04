@@ -40,16 +40,10 @@ echo -e "\t\t}" >>jp_hi_ka_ranges.h
 echo -e "\t}" >>jp_hi_ka_ranges.h
 echo -e "};" >>jp_hi_ka_ranges.h
 echo -e "" >>jp_hi_ka_ranges.h
-echo -e "enum {" >>jp_hi_ka_ranges.h
+OFFSET=0x3000
 for i in ${UNICODE_RANGES[*]}; do
-	if [[ ! -v XBM_SCRIPT_ENUM_START ]]; then
-		XBM_SCRIPT_ENUM_START=1
-		echo -e "\t${i##*:} = 0x3000," >>jp_hi_ka_ranges.h
-	else
-		echo -e "\t${i##*:}," >>jp_hi_ka_ranges.h
-	fi
+	printf "#define ${i##*:} %#X\n" $((OFFSET++)) >>jp_hi_ka_ranges.h
 done
-echo -e "};" >>jp_hi_ka_ranges.h
 
 rm jp_hi_ka_10.h jp_hi_ka_12.h jp_hi_ka_14.h
 for i in ${UNICODE_RANGES[*]}; do
