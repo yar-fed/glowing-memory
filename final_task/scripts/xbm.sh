@@ -1,6 +1,7 @@
 #!/bin/bash
 # utilities used: convert (from package imagemagick)
 #                 unum (wget http://www.fourmilab.ch/webtools/unum/download/unum.tar.gz)
+[[ ! -v PIXEL_FONT ]] && PIXEL_FONT="~/Downloads/PixelMplus10-Regular.ttf"
 
 PARSE_COMMAND="{s/.*\"(.)\"\W*(.*)/\1:\2/;/^ (.*)/d;s/[-+ ]/_/g}"
 UNICODE_RANGES=($(unum l="cjk.*punctuation" l=hiragana l="katakana$" | sed -E "$PARSE_COMMAND"))
@@ -51,7 +52,7 @@ for i in ${UNICODE_RANGES[*]}; do
 	CHAR=${i%%:*}
 	NAME=${i##*:}
 	# get 10x10 xbm
-	[[ ! -f "${NAME}10.xbm" ]] && convert -extent 10x10 -font ~/Downloads/PixelMplus10-Regular.ttf -pointsize 10 label:${CHAR} "${NAME}10.xbm"
+	[[ ! -f "${NAME}10.xbm" ]] && convert -extent 10x10 -font "$PIXEL_FONT" -pointsize 10 label:${CHAR} "${NAME}10.xbm"
 	# add 1 pixel white border
 	[[ ! -f "${NAME}12.xbm" ]] && convert "${NAME}10.xbm" -border 1x1 "${NAME}12.xbm"
 	# add 1 pixel black border
