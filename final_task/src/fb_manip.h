@@ -24,44 +24,45 @@
 
 #define SWAP(t, x, y) {t _tmp = x; x = y; y = _tmp;}
 
-static int fbfd;
-static __u16 *fbp;
-static struct fb_var_screeninfo vsinfo;
-
-static inline void putpixel(int x, int y, __u16 c)
-{
-	fbp[x + y * SCREEN_WIDTH] = c;
-}
-
-static inline void drawrect(int x, int y, int w, int h, __u16 c)
-{
-	for (int i = 0; i < w; ++i) {
-		putpixel(x + i, y, c);
-	}
-	for (int i = 1; i < h - 1; ++i) {
-		putpixel(x, y + i, c);
-		putpixel(x + w - 1, y + i, c);
-	}
-	for (int i = 0; i < w; ++i) {
-		putpixel(x + i, y + h - 1, c);
-	}
-}
-
-static inline void fillrect(int x, int y, int w, int h, __u16 c)
-{
-	for (int i = 0; i < h; ++i) {
-		for (int j = 0; j < w; ++j) {
-			putpixel(x + j, y + i, c);
-		}
-	}
-}
+struct fb_manip {
+	static int fbfd;
+	static __u16 *fbp;
+};
 
 static inline __u16 _get_2B_xbm_bit(char *bits, int x, int y)
 {
 	return ((u_int8_t)bits[(x >> 3) + (y << 1)] & (1 << (x % 8))) ? 0xffff : 0x0000;
 }
 
-static inline void put_2B_xbm_bg(int point_size, int x, int y, __u16 fg,__u16 bg, char *bits)
+static inline void putpixel(struct fb_manip *fb, int x, int y, __u16 c)
+{
+	fb->fbp[x + y * SCREEN_WIDTH] = c;
+}
+
+inline void drawrect(struct fb_manip *fb, int x, int y, int w, int h, __u16 c)
+{
+	for (int i = 0; i < w; ++i) {
+		putpixel(fb, x + i, y, c);
+	}
+	for (int i = 1; i < h - 1; ++i) {
+		putpixel(fb, x, y + i, c);
+		putpixel(fb, x + w - 1, y + i, c);
+	}
+	for (int i = 0; i < w; ++i) {
+		putpixel(fb, x + i, y + h - 1, c);
+	}
+}
+
+inline void fillrect(struct fb_manip *fb, int x, int y, int w, int h, __u16 c)
+{
+	for (int i = 0; i < h; ++i) {
+		for (int j = 0; j < w; ++j) {
+			putpixel(fb, x + j, y + i, c);
+		}
+	}
+}
+
+inline void put_2B_xbm_bg(struct fb_manip *fb, int point_size, int x, int y, __u16 fg,__u16 bg, char *bits)
 {
 	for (int i = 0; i < point_size; ++i) {
 		for (int j = 0; j < point_size; ++j) {
@@ -71,7 +72,7 @@ static inline void put_2B_xbm_bg(int point_size, int x, int y, __u16 fg,__u16 bg
 	}
 }
 
-static inline void put_2B_xbm(int point_size, int x, int y, __u16 c, char *bits)
+inline void put_2B_xbm(struct fb_manip *fb, int point_size, int x, int y, __u16 c, char *bits)
 {
 	for (int i = 0; i < point_size; ++i) {
 		for (int j = 0; j < point_size; ++j) {
@@ -81,58 +82,53 @@ static inline void put_2B_xbm(int point_size, int x, int y, __u16 c, char *bits)
 	}
 }
 
-static inline void clear_screen(__u16 c)
+inline void clear_screen(struct fb_manip *fb, __u16 c)
 {
-	memset(fbp, c, SCREEN_BUFFER_SIZE);
+	memset(fb->fbp, c, SCREEN_BUFFER_SIZE);
 }
 
-#define put_10x10xbm_bg(x, y, fg, bg, bits) put_2B_xbm_bg(10, x, y, fg, bg, bits)
-#define put_10x10xbm(x, y, c, bits) put_2B_xbm(10, x, y, c, bits)
-#define put_12x12xbm_bg(x, y, fg, bg, bits) put_2B_xbm_bg(12, x, y, fg, bg, bits)
-#define put_12x12xbm(x, y, c, bits) put_2B_xbm(12, x, y, c, bits)
-#define put_14x14xbm_bg(x, y, fg, bg, bits) put_2B_xbm_bg(14, x, y, fg, bg, bits)
-#define put_14x14xbm(x, y, c, bits) put_2B_xbm(14, x, y, c, bits)
+#define put_10x10xbm_bg(fb, x, y, fg, bg, bits) put_2B_xbm_bg(fb, 10, x, y, fg, bg, bits)
+#define put_10x10xbm(fb, x, y, c, bits) put_2B_xbm(fb, 10, x, y, c, bits)
+#define put_12x12xbm_bg(fb, x, y, fg, bg, bits) put_2B_xbm_bg(fb, 12, x, y, fg, bg, bits)
+#define put_12x12xbm(fb, x, y, c, bits) put_2B_xbm(fb, 12, x, y, c, bits)
+#define put_14x14xbm_bg(fb, x, y, fg, bg, bits) put_2B_xbm_bg(fb, 14, x, y, fg, bg, bits)
+#define put_14x14xbm(fb, x, y, c, bits) put_2B_xbm(fb, 14, x, y, c, bits)
 
-static inline void draw_keyboard(int x, int y, __u16 fg, __u16 bg, __u16 layout)
+inline void draw_keyboard(struct fb_manip *fb, int x, int y, __u16 fg, __u16 bg, __u16 layout)
 {
-	drawrect(x, y, 4*14+2, 4*14+2, fg);
-	put_14x14xbm_bg(x +  1, y +  1, fg, bg, kb_layouts[layout].keys[0]);
-	put_14x14xbm_bg(x + 15, y +  1, fg, bg, kb_layouts[layout].keys[1]);
-	put_14x14xbm_bg(x + 29, y +  1, fg, bg, kb_layouts[layout].keys[2]);
-	put_14x14xbm_bg(x + 43, y +  1, fg, bg, kb_layouts[layout].keys[3]);
-	put_14x14xbm_bg(x +  1, y + 15, fg, bg, kb_layouts[layout].keys[4]);
-	put_14x14xbm_bg(x + 15, y + 15, fg, bg, kb_layouts[layout].keys[5]);
-	put_14x14xbm_bg(x + 29, y + 15, fg, bg, kb_layouts[layout].keys[6]);
-	put_14x14xbm_bg(x + 43, y + 15, fg, bg, kb_layouts[layout].keys[7]);
-	put_14x14xbm_bg(x +  1, y + 29, fg, bg, kb_layouts[layout].keys[8]);
-	put_14x14xbm_bg(x + 15, y + 29, fg, bg, kb_layouts[layout].keys[9]);
-	put_14x14xbm_bg(x + 29, y + 29, fg, bg, kb_layouts[layout].keys[10]);
-	put_14x14xbm_bg(x + 43, y + 29, fg, bg, kb_layouts[layout].keys[11]);
-	put_14x14xbm_bg(x +  1, y + 43, fg, bg, kb_layouts[layout].keys[12]);
-	put_14x14xbm_bg(x + 15, y + 43, fg, bg, kb_layouts[layout].keys[13]);
-	put_14x14xbm_bg(x + 29, y + 43, fg, bg, kb_layouts[layout].keys[14]);
-	put_14x14xbm_bg(x + 43, y + 43, fg, bg, kb_layouts[layout].keys[15]);
+	drawrect(fb, x, y, 4*14+2, 4*14+2, fg);
+	int k = 0;
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			put_14x14xbm_bg(fb, x + 1 + j * 14, y + 1 + i * 14,
+					fg, bg, kb_layouts[layout].keys[k++]);
+		}
+	}
 }
 
-static inline void draw_key(int x, int y, __u16 fg, __u16 bg, __u16 key, __u16 layout, int down)
+inline void draw_key(struct fb_manip *fb, int x, int y, __u16 fg, __u16 bg, __u16 key, __u16 layout, int down)
 {
 	if (down)
 		SWAP(__u16, fg, bg);
-	put_14x14xbm_bg(x + 1 + (key & 3) * 14, y + 1 + (key >> 2) * 14, fg, bg, kb_layouts[layout].keys[key]);
+	put_14x14xbm_bg(fb, x + 1 + (key & 3) * 14, y + 1 + (key >> 2) * 14, fg, bg, kb_layouts[layout].keys[key]);
 }
 
-static inline void draw_symbol(int x, int y, __u16 fg, __u16 bg, __u16 key, __u16 layout, int selected)
+inline void draw_symbol(struct fb_manip *fb, int x, int y, __u16 fg, __u16 bg, __u16 key, __u16 layout, int selected)
 {
 	if (selected)
 		SWAP(__u16, fg, bg);
-	put_12x12xbm_bg(x + 1 + (key & 3) * 12, y + 1 + (key >> 2) * 12, fg, bg, kb_layouts[layout].keys[key]);
+	put_12x12xbm_bg(fb, x + 1 + (key & 3) * 12, y + 1 + (key >> 2) * 12, fg, bg, kb_layouts[layout].keys[key]);
 }
 
-int main(int argc, char *argv[])
+struct fb_manip *grab_fb(char *fb)
 {
-	fbfd = open("/dev/fb1", O_RDWR);
-	if (fbfd == -1)
+	if (NULL == fb)
+		fb = "/dev/fb1";
+	fbfd = open(fb, O_RDWR);
+	if (fbfd == -1) {
+		printf("Failed to open fb\n");
 		return -1;
+	}
 	fbp = (__u16*)mmap(0,
 		SCREEN_BUFFER_SIZE,
 		PROT_READ | PROT_WRITE,
@@ -145,14 +141,18 @@ int main(int argc, char *argv[])
 	}
 	__u32 dummy = 0;
 	clear_screen(BLACK);
-	draw_keyboard(20, 20, GREEN, BLACK, 0);
-	for (int i = 0; i < 16; ++i) {
-		draw_key(20, 20, GREEN, BLACK, i, 0, 1);
+	//draw_keyboard(20, 20, GREEN, BLACK, 0);
+	for (int i = 0; i < 23; ++i) {
+		draw_keyboard(20, 20, GREEN, BLACK, i);
 		ioctl(fbfd, FBIO_WAITFORVSYNC, &dummy);
-		sleep(1);
-		draw_key(20, 20, GREEN, BLACK, i, 0, 0);
+		getchar();
+		draw_keyboard(20, 20, GREEN, BLACK, i);
 	}
-	munmap(fbp, SCREEN_BUFFER_SIZE);
-	close(fbfd);
+}
+
+void release_fb(struct fb_manip *fb)
+{
+	munmap(fb->fbp, SCREEN_BUFFER_SIZE);
+	close(fb->fbfd);
 	return 0;
 }
