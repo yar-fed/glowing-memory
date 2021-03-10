@@ -1,3 +1,5 @@
 *.xbm
 *.ko
 *.o
+jp_hi_ka*
+*.dtbo
