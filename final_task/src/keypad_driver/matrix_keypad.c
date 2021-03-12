@@ -37,9 +37,6 @@ struct matrix_keypad {
 	bool gpio_all_disabled;
 };
 
-uint32_t debug_kb[MATRIX_MAX_COLS];
-EXPORT_SYMBOL(debug_kb);
-
 /*
  * NOTE: If drive_inactive_cols is false, then the GPIO has to be put into
  * HiZ when de-activated to cause minmal side effect when scanning other
@@ -140,8 +137,6 @@ static void matrix_keypad_scan(struct work_struct *work)
 
 		activate_col(pdata, col, false);
 	}
-	memcpy(debug_kb, new_state,
-		sizeof(keypad->last_key_state[0]) * pdata->num_col_gpios);
 
 	for (col = 0; col < pdata->num_col_gpios; col++) {
 		uint32_t bits_changed;
@@ -159,7 +154,11 @@ static void matrix_keypad_scan(struct work_struct *work)
 			input_report_key(input_dev,
 					 keycodes[code],
 					 new_state[col] & (1 << row));
+			if (pdata->no_multy)
+				break;
 		}
+		if (pdata->no_multy)
+			break;
 	}
 	input_sync(input_dev);
 
@@ -428,6 +427,9 @@ matrix_keypad_parse_dt(struct device *dev)
 		return ERR_PTR(-EINVAL);
 	}
 
+	if (of_get_property(np, "linux,no-multy", NULL))
+		pdata->no_multy = true;
+
 	if (of_get_property(np, "linux,no-autorepeat", NULL))
 		pdata->no_autorepeat = true;
 
@@ -588,3 +590,4 @@ MODULE_AUTHOR("Marek Vasut <marek.vasut@gmail.com>");
 MODULE_DESCRIPTION("GPIO Driven Matrix Keypad Driver");
 MODULE_LICENSE("GPL v2");
 MODULE_ALIAS("platform:matrix-keypad");
+MODULE_VERSION("1.1");

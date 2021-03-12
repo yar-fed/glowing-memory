@@ -1,4 +1,4 @@
-TARGET_DIR=/tmp/xbm_script
+XBM_TARGET_DIR=/tmp/xbm_script
 CROSS_COMPILE=arm-linux-gnueabihf-
 CC=gcc
 
@@ -29,15 +29,24 @@ build: src/jp_hi_ka_ranges.h 4x4matrix.dtbo
 
 src/jp_hi_ka_ranges.h:
 	$(MAKE) gen_xbm_headers
-gen_xbm_headers: $(TARGET_DIR)
-	TARGET_DIR=$(TARGET_DIR) scripts/xbm.sh 2>/dev/null
-	cp $(TARGET_DIR)/jp_hi_ka* src/
+gen_xbm_headers: $(XBM_TARGET_DIR)
+	TARGET_DIR=$(XBM_TARGET_DIR) scripts/xbm.sh 2>/dev/null
+	cp $(XBM_TARGET_DIR)/jp_hi_ka* src/
 
 4x4matrix.dtbo:
 	$(KDIR)/scripts/dtc/dtc -W no-unit_address_vs_reg -I dts -O dtb -o 4x4matrix.dtbo src/dts/4x4matrix.dts
 
-deploy:
+keypad_driver:
+	$(MAKE) -C $(KDIR) CROSS_COMPILE=$(CROSS_COMPILE) ARCH=arm M=$(CURDIR)/src/keypad_driver modules
+
+keypad_driver_clean:
+	$(MAKE) -C $(KDIR) CROSS_COMPILE=$(CROSS_COMPILE) ARCH=arm M=$(CURDIR)/src/keypad_driver clean
+
+deploy: deploy_device_tree
 	scp keyboard.o $(HOST):
+	scp src/keypad_driver/matrix_keypad.ko $(HOST):
+	ssh $(HOST) sudo rmmod matrix_keypad
+	ssh $(HOST) sudo insmod ./matrix_keypad.ko
 
 deploy_device_tree: 4x4matrix.dtbo
 	scp 4x4matrix.dtbo $(HOST):
@@ -45,8 +54,9 @@ deploy_device_tree: 4x4matrix.dtbo
 	ssh $(HOST) sudo -S /usr/bin/dtoverlay sainsmart18 speed=2000000 fps=60 rotate=270
 	ssh $(HOST) sudo -S /usr/bin/dtoverlay 4x4matrix
 
-clean:
-	-@rm -rf $(TARGET_DIR)
+clean: keypad_driver_clean
+	-@rm -rf $(XBM_TARGET_DIR)
+	-@rm ./*.o ./*.dtbo
 
-$(TARGET_DIR):
+$(XBM_TARGET_DIR):
 	@mkdir -p $@
