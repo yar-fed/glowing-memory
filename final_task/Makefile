@@ -21,7 +21,7 @@ SOURCE_FILES = \
 			   src/main.c
 
 
-.PHONY: all clean xbm_script deploy deploy_device_tree
+.PHONY: all clean xbm_script deploy deploy_device_tree keypad_driver keypad_driver_clean
 all: build
 
 build: src/jp_hi_ka_ranges.h 4x4matrix.dtbo
