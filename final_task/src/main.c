@@ -7,7 +7,7 @@
 //#define TEXT_BUFFER_VISIBLE_HEIGHT SCREEN_HEIGHT / 10
 #define TEXT_BUFFER_VISIBLE_HEIGHT 5
 #define TEXT_BUFFER_VISIBLE_LENGTH                                             \
-	TEXT_BUFFER_VISIBLE_HEIGHT * TEXT_BUFFER_VISIBLE_WIDTH
+	TEXT_BUFFER_VISIBLE_HEIGHT *TEXT_BUFFER_VISIBLE_WIDTH
 #define KB_X 91
 #define KB_Y 35
 
@@ -342,7 +342,8 @@ static int on_key_up(int key)
 	default:
 		if (kb_layouts[state.layout].codes[state.key_pressed] == 0)
 			break;
-		if (put_symbol_after_cursor(kb_layouts[state.layout].codes[key])) {
+		if (put_symbol_after_cursor(
+			    kb_layouts[state.layout].codes[key])) {
 			redraw_full_buffer();
 		} else {
 			if (text_buffer.size > 1) {
@@ -374,12 +375,24 @@ finilize:
 	return 0;
 }
 
-
 static void init_buffer(void)
 {
 	text_buffer.max_size = TEXT_BUFFER_VISIBLE_LENGTH;
 	text_buffer.data =
 		malloc(TEXT_BUFFER_VISIBLE_LENGTH * sizeof(*text_buffer.data));
+}
+
+static void redefine_missing_glyphs()
+{
+	memset(IDEOGRAPHIC_SPACE_xbm10, 0, sizeof(IDEOGRAPHIC_SPACE_xbm10));
+	memset(WAVE_DASH_xbm10, 0, sizeof(WAVE_DASH_xbm10));
+	((__u16 *)WAVE_DASH_xbm10)[4] = 0x010C;
+	((__u16 *)WAVE_DASH_xbm10)[5] = 0x0092;
+	((__u16 *)WAVE_DASH_xbm10)[6] = 0x0061;
+	for (int i = 0; i < sizeof(WAVE_DASH_xbm10) >> 1; ++i) {
+		((__u16 *)WAVE_DASH_xbm14)[i + 2] &=
+			0x2001 ^ (((__u16 *)WAVE_DASH_xbm10)[i] << 2);
+	}
 }
 
 static void print_hello(void)
@@ -413,6 +426,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	init_buffer();
+	redefine_missing_glyphs();
 	clear_screen(fb, BLACK);
 	draw_keyboard(fb, KB_X, KB_Y, GREEN, BLACK, state.layout);
 	print_hello();
