@@ -17,9 +17,12 @@ To simplify drawing of characters a custom script is going to convert a 10x10 pi
  - 4x4 matrix keyboard
  - LCD Display based on ST7735 controller
 
-## References
+# Pinout
 
- - [Video](https://drive.google.com/file/d/1vIMtx0Iq_zUow0K363qm5QsIY-dnJYeN/view?usp=sharing)
- - [Pinout](doc/Pinout.png)
- - [Pinout_Photo1](doc/pinout_photo1.jpg)
- - [Pinout_Photo2](doc/pinout_photo2.jpg)
+![Pinout](doc/Pinout.png)
+![Pinout_Photo1](doc/pinout_photo1.jpg)
+![Pinout_Photo2](doc/pinout_photo2.jpg)
+
+# References
+
+[Video](https://drive.google.com/file/d/1vIMtx0Iq_zUow0K363qm5QsIY-dnJYeN/view?usp=sharing)
